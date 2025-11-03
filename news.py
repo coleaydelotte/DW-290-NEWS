@@ -4,8 +4,71 @@ import duckdb
 import shutil
 import re
 import glob
+import filecmp
+from git import Repo
 
-data_dir = "./data"
+# --- CONFIG ---
+REPO_URL = "https://github.com/Webhose/fake-news-dataset.git"
+REPO_DIR = "fake-news-dataset"
+DATA_DIR = "./fake-news-dataset/Datasets"
+UNZIPPED_FLAT_DIR = "unzipped_flat"
+UNZIPPED_ALL_DIR = "unzipped_all"
+CSV_FILE = "all_articles_summary.csv"
+
+# --- CLONE OR PULL REPO ---
+if not os.path.exists(REPO_DIR):
+    print("Cloning fake-news-dataset repo...")
+    Repo.clone_from(REPO_URL, REPO_DIR)
+else:
+    print("Updating existing fake-news-dataset repo...")
+    repo = Repo(REPO_DIR)
+    origin = repo.remotes.origin
+    origin.pull()
+
+# --- FIND ZIP FILES IN REPO ---
+repo_zip_files = glob.glob(os.path.join(REPO_DIR, "*.zip"))
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# --- CHECK FOR NEW ZIP FILES ---
+def zip_is_new(zip_path, data_dir):
+    """Check if a zip file is new or has changed compared to the one in data_dir."""
+    filename = os.path.basename(zip_path)
+    dest_path = os.path.join(data_dir, filename)
+    if not os.path.exists(dest_path):
+        return True
+    return not filecmp.cmp(zip_path, dest_path, shallow=False)
+
+new_zips = [z for z in repo_zip_files if zip_is_new(z, DATA_DIR)]
+
+# --- HANDLE NEW FILES ---
+if new_zips:
+    print("New ZIP files detected — resetting directories and CSV...")
+
+    # Delete old folders and CSV
+    for target in [UNZIPPED_FLAT_DIR, UNZIPPED_ALL_DIR]:
+        if os.path.exists(target):
+            shutil.rmtree(target)
+            print(f"Deleted {target}/")
+        os.makedirs(target)
+        print(f"Recreated {target}/")
+
+    if os.path.exists(CSV_FILE):
+        os.remove(CSV_FILE)
+        print(f"Deleted {CSV_FILE}")
+
+    # Copy new ZIPs to data folder
+    for zip_path in repo_zip_files:
+        shutil.copy2(zip_path, DATA_DIR)
+        print(f"Copied {os.path.basename(zip_path)} to data/")
+else:
+    print("No new ZIP files detected — keeping existing folders and CSV.")
+
+print("Setup complete — continuing with main processing...")
+
+# --- EXISTING SCRIPT CONTENT BELOW ---
+# (Paste the rest of your original news.py logic here, e.g. unzip, DuckDB, and data processing steps)
+
+data_dir = "./fake-news-dataset/Datasets"
 extract_root = "./unzipped_all"
 flat_dir = "./unzipped_flat"
 output_csv = "all_articles_summary.csv"
@@ -22,7 +85,7 @@ if not os.path.exists(flat_dir):
     # Find all ZIPs
     zip_files = glob.glob(os.path.join(data_dir, "*.zip"))
     if not zip_files:
-        raise FileNotFoundError("No ZIP files found in ./data/")
+        raise FileNotFoundError("No ZIP files found in ./fake-news-dataset/Datasets")
 
     print(f"Found {len(zip_files)} ZIP files to process.")
 
@@ -55,7 +118,7 @@ if not os.path.exists(flat_dir):
 
     print(f"Extracted and renamed {json_count} JSON files from all ZIPs.")
 else:
-    print(f" Flattened directory already exists — skipping extraction and renaming.")
+    print(f"Flattened directory already exists — skipping extraction and renaming.")
 
 # Loads extracted and renamed files into duckdb
 con = duckdb.connect()
