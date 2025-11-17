@@ -92,6 +92,8 @@ SELECT
     json_extract_string(data, '$.published') AS Published,
     json_extract_string(data, '$.thread.title') AS Title,
     json_extract_string(data, '$.thread.country') AS Country,
+    json_extract_string(data, '$.thread.site_categories') AS Site_Categories,
+    json_extract_string(data, '$.language') AS Languages,
 FROM read_json_auto(
     '{flat_dir}/*.json',
     sample_size=-1,
