@@ -87,20 +87,42 @@ con = duckdb.connect()
 
 query = f"""
 SELECT
+    json_extract_string(data, '$.uuid') AS UUID,
+    json_extract_string(data, '$.url') AS URL,
     json_extract_string(data, '$.author') AS Author,
-    json_extract_string(data, '$.url') AS Site,
+    json_extract_string(data, '$.title') AS Title,
+    json_extract_string(data, '$.text') AS Text,
     json_extract_string(data, '$.published') AS Published,
-    json_extract_string(data, '$.thread.title') AS Title,
+    json_extract_string(data, '$.language') AS Language,
+    json_extract_string(data, '$.rating') AS Rating,
+
+    -- Thread fields
+    json_extract_string(data, '$.thread.title') AS ThreadTitle,
+    json_extract_string(data, '$.thread.url') AS ThreadURL,
+    json_extract_string(data, '$.thread.site_full') AS SiteFull,
+    json_extract_string(data, '$.thread.site') AS Site,
+    json_extract_string(data, '$.thread.site_section') AS SiteSection,
+    json_extract_string(data, '$.thread.section_title') AS SectionTitle,
+    json_extract_string(data, '$.thread.published') AS ThreadPublished,
     json_extract_string(data, '$.thread.country') AS Country,
-    json_extract_string(data, '$.thread.site_categories') AS Site_Categories,
-    json_extract_string(data, '$.language') AS Languages,
+    json_extract_string(data, '$.thread.domain_rank') AS DomainRank,
+    json_extract_string(data, '$.thread.replies_count') AS RepliesCount,
+    json_extract_string(data, '$.thread.participants_count') AS Participants,
+    json_extract_string(data, '$.thread.main_image') AS MainImage,
+    json_extract_string(data, '$.thread.site_type') AS SiteType,
+
+    -- Keep raw JSON for later if needed
+    data AS RawJSON,
+    filename AS SourceFile
+
 FROM read_json_auto(
     '{flat_dir}/*.json',
     sample_size=-1,
+    ignore_errors=true,
     union_by_name=true,
-    maximum_depth=10,
+    maximum_depth=12,
     filename=true
-) AS data
+) AS data;
 """
 
 print("Reading JSON files with DuckDB...")

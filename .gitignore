@@ -1,0 +1,5 @@
+fake-news-dataset/
+unzipped_all/
+unzipped_flat/
+
+*.csv
