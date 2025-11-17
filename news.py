@@ -95,7 +95,6 @@ SELECT
 FROM read_json_auto(
     '{flat_dir}/*.json',
     sample_size=-1,
-    ignore_errors=true,
     union_by_name=true,
     maximum_depth=10,
     filename=true
