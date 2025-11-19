@@ -87,14 +87,10 @@ con = duckdb.connect()
 
 query = f"""
 SELECT
-    json_extract_string(data, '$.uuid') AS UUID,
     json_extract_string(data, '$.url') AS URL,
     json_extract_string(data, '$.author') AS Author,
-    json_extract_string(data, '$.title') AS Title,
-    -- REMOVED: Text (save tons of space)
     json_extract_string(data, '$.published') AS Published,
     json_extract_string(data, '$.language') AS Language,
-    json_extract_string(data, '$.rating') AS Rating,
 
     -- Thread fields
     json_extract_string(data, '$.thread.title') AS ThreadTitle,
