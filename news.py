@@ -15,72 +15,72 @@ flat_dir = "./unzipped_flat"
 output_csv = "all_articles_summary.csv"
 
 # Clean up previous run artifacts
-# print("Cleaning up previous files...")
-# for path in [extract_root, flat_dir, output_csv]:
-#     if os.path.exists(path):
-#         if os.path.isdir(path):
-#             shutil.rmtree(path)
-#             print(f"Removed directory: {path}")
-#         else:
-#             os.remove(path)
-#             print(f"Removed file: {path}")
+print("Cleaning up previous files...")
+for path in [extract_root, flat_dir, output_csv]:
+    if os.path.exists(path):
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+            print(f"Removed directory: {path}")
+        else:
+            os.remove(path)
+            print(f"Removed file: {path}")
 
 # # Clone or update the repository
-# if os.path.exists(REPO_NAME):
-#     print(f"Repository directory '{REPO_NAME}' exists. Removing and re-cloning...")
-#     shutil.rmtree(REPO_NAME)
+if os.path.exists(REPO_NAME):
+    print(f"Repository directory '{REPO_NAME}' exists. Removing and re-cloning...")
+    shutil.rmtree(REPO_NAME)
 
-# print(f"Cloning repository from {GITHUB_REPO}...")
-# try:
-#     subprocess.run(["git", "clone", GITHUB_REPO], check=True)
-#     print("Repository cloned successfully.")
-# except subprocess.CalledProcessError as e:
-#     raise RuntimeError(f"Failed to clone repository: {e}")
+print(f"Cloning repository from {GITHUB_REPO}...")
+try:
+    subprocess.run(["git", "clone", GITHUB_REPO], check=True)
+    print("Repository cloned successfully.")
+except subprocess.CalledProcessError as e:
+    raise RuntimeError(f"Failed to clone repository: {e}")
 
 # # Verify data directory exists
-# if not os.path.exists(data_dir):
-#     raise FileNotFoundError(f"Expected data directory not found: {data_dir}")
+if not os.path.exists(data_dir):
+    raise FileNotFoundError(f"Expected data directory not found: {data_dir}")
 
 # # Extracts the files into their own directory
-# print("Extracting ZIP files...")
-# os.makedirs(extract_root, exist_ok=True)
-# os.makedirs(flat_dir, exist_ok=True)
+print("Extracting ZIP files...")
+os.makedirs(extract_root, exist_ok=True)
+os.makedirs(flat_dir, exist_ok=True)
 
-# # Find all ZIPs
-# zip_files = glob.glob(os.path.join(data_dir, "*.zip"))
-# if not zip_files:
-#     raise FileNotFoundError(f"No ZIP files found in {data_dir}")
+# Find all ZIPs
+zip_files = glob.glob(os.path.join(data_dir, "*.zip"))
+if not zip_files:
+    raise FileNotFoundError(f"No ZIP files found in {data_dir}")
 
-# print(f"Found {len(zip_files)} ZIP files to process.")
+print(f"Found {len(zip_files)} ZIP files to process.")
 
-# json_count = 0
+json_count = 0
 
-# # Process each ZIP
-# for zip_path in zip_files:
-#     match = re.search(r'(\d{8,})', os.path.basename(zip_path))
-#     date_code = match.group(1) if match else "unknown"
+# Process each ZIP
+for zip_path in zip_files:
+    match = re.search(r'(\d{8,})', os.path.basename(zip_path))
+    date_code = match.group(1) if match else "unknown"
 
-#     zip_extract_dir = os.path.join(
-#         extract_root, os.path.splitext(os.path.basename(zip_path))[0]
-#     )
-#     os.makedirs(zip_extract_dir, exist_ok=True)
+    zip_extract_dir = os.path.join(
+        extract_root, os.path.splitext(os.path.basename(zip_path))[0]
+    )
+    os.makedirs(zip_extract_dir, exist_ok=True)
 
-#     # Extract contents
-#     with zipfile.ZipFile(zip_path, "r") as zip_ref:
-#         zip_ref.extractall(zip_extract_dir)
+    # Extract contents
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(zip_extract_dir)
 
-#     # Copy JSONs and rename with date code
-#     for root, _, files in os.walk(zip_extract_dir):
-#         for filename in files:
-#             if filename.lower().endswith(".json"):
-#                 name_no_ext = os.path.splitext(filename)[0]
-#                 new_name = f"{name_no_ext}_{date_code}.json"
-#                 src = os.path.join(root, filename)
-#                 dst = os.path.join(flat_dir, new_name)
-#                 shutil.copy(src, dst)
-#                 json_count += 1
+    # Copy JSONs and rename with date code
+    for root, _, files in os.walk(zip_extract_dir):
+        for filename in files:
+            if filename.lower().endswith(".json"):
+                name_no_ext = os.path.splitext(filename)[0]
+                new_name = f"{name_no_ext}_{date_code}.json"
+                src = os.path.join(root, filename)
+                dst = os.path.join(flat_dir, new_name)
+                shutil.copy(src, dst)
+                json_count += 1
 
-# print(f"Extracted and renamed {json_count} JSON files from all ZIPs.")
+print(f"Extracted and renamed {json_count} JSON files from all ZIPs.")
 
 # Loads extracted and renamed files into duckdb
 con = duckdb.connect()
