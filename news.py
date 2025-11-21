@@ -94,12 +94,8 @@ SELECT
 
     -- Thread fields
     json_extract_string(data, '$.thread.title') AS ThreadTitle,
-    json_extract_string(data, '$.thread.url') AS ThreadURL,
-    json_extract_string(data, '$.thread.site_full') AS SiteFull,
     json_extract_string(data, '$.thread.site') AS Site,
     json_extract_string(data, '$.thread.site_section') AS SiteSection,
-    json_extract_string(data, '$.thread.section_title') AS SectionTitle,
-    json_extract_string(data, '$.thread.published') AS ThreadPublished,
     json_extract_string(data, '$.thread.country') AS Country,
     json_extract_string(data, '$.thread.domain_rank') AS DomainRank,
     json_extract_string(data, '$.thread.replies_count') AS RepliesCount,
