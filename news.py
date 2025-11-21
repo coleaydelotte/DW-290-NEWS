@@ -93,7 +93,7 @@ SELECT
     json_extract_string(data, '$.language') AS Language,
 
     -- Thread fields
-    json_extract_string(data, '$.thread.title') AS ThreadTitle,
+    json_extract_string(data, '$.thread.title') AS Title,
     json_extract_string(data, '$.thread.site') AS Site,
     json_extract_string(data, '$.thread.site_section') AS SiteSection,
     json_extract_string(data, '$.thread.country') AS Country,
